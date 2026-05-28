@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oficios Perú - SaaS Intermediario de Servicios Técnicos de Confianza</title>
+  
+  <link rel="icon" type="image/svg+xml" href="frontend/assets/icons/favicon.svg">
+
+  <!-- Bootstrap 5 Grid & Base Resets via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome Icons 6.5.1 via CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Estilos del Sistema de Diseño (Estilo Gemini) -->
+  <link rel="stylesheet" href="frontend/css/style.css">
+  <link rel="stylesheet" href="frontend/css/animations.css">
+  <link rel="stylesheet" href="frontend/css/responsive.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+  <!-- 1. HEADER & NAVIGATION BAR (Metodología BEM: .navbar) -->
+  <header>
+    <nav class="navbar animate-slide-down" aria-label="Navegación principal">
+      <div class="container-custom navbar__wrapper">
+        
+        <!-- Marca y Logo -->
+        <a href="#" class="navbar__logo" id="main-logo" aria-label="Oficios Perú Inicio">
+          <img class="navbar__logo-img" src="frontend/assets/icons/logo.png" alt="Oficios Perú" width="160" height="40">
+        </a>
+
+        <!-- Enlaces centrales -->
+        <ul class="navbar__menu" id="nav-menu" role="menubar">
+          <li role="none">
+            <a href="#" class="navbar__link navbar__link--active" role="menuitem" aria-current="page">Inicio</a>
+          </li>
+          <li role="none">
+            <a href="frontend/pages/catalogo.html" class="navbar__link" role="menuitem">Buscar Técnicos</a>
+          </li>
+          <li role="none">
+            <a href="#beneficios" class="navbar__link" role="menuitem">Beneficios</a>
+          </li>
+          <li role="none">
+            <a href="#testimonios" class="navbar__link" role="menuitem">Opiniones</a>
+          </li>
+        </ul>
+
+        <!-- Accciones de entrada/registro -->
+        <div class="navbar__actions">
+          <a href="frontend/pages/login.html" class="btn btn--text" id="btn-login-nav">Iniciar Sesión</a>
+          <a href="frontend/pages/registro.html" class="btn btn--primary" id="btn-register-nav">Registrarse</a>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- 2. HERO SECTION (Introducción e Intermediación Directa) -->
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container-custom hero__grid">
+        <div class="hero__content">
+          
+          <!-- Badge Promocional -->
+          <div class="hero__badge animate-fade-in">
+            <i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i>
+            <span>Plataforma SaaS Oficial del Perú</span>
+          </div>
+
+          <!-- Título Principal Fluido con clamp() -->
+          <h1 class="hero__title animate-slide-up delay-100" id="hero-title">
+            Encuentra Expertos Técnicos <br>
+            <span class="hero__title-accent">Garantizados al Instante</span>
+          </h1>
+
+          <!-- Subtítulo Explicativo -->
+          <p class="hero__subtitle animate-slide-up delay-200">
+            Conectamos hogares y empresas con electricistas, gasfiteros y carpinteros verificados en todo el Perú. 
+            Calidad garantizada, cotizaciones transparentes y servicio ágil con el respaldo de nuestra comunidad.
+          </p>
+
+          <!-- Formulario de Búsqueda Rápida e Integrada -->
+          <form id="hero-search-form" class="search-form animate-slide-up delay-300" action="frontend/pages/catalogo.html" method="GET" novalidate>
+            
+            <!-- Grupo Departamento -->
+            <div class="search-form__group">
+              <i class="fa-solid fa-location-dot search-form__icon" aria-hidden="true"></i>
+              <div class="search-form__input-wrapper">
+                <label for="departamento" class="search-form__label">Departamento</label>
+                <select id="departamento" class="search-form__select" aria-required="true" name="departamento">
+                  <option value="" disabled selected>Selecciona Departamento</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="search-form__divider" aria-hidden="true"></div>
+
+            <!-- Grupo Provincia -->
+            <div class="search-form__group">
+              <i class="fa-solid fa-location-dot search-form__icon" aria-hidden="true"></i>
+              <div class="search-form__input-wrapper">
+                <label for="provincia" class="search-form__label">Provincia</label>
+                <select id="provincia" class="search-form__select" aria-required="true" name="provincia" disabled>
+                  <option value="" disabled selected>Selecciona Provincia</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="search-form__divider" aria-hidden="true"></div>
+
+            <!-- Grupo Distrito -->
+            <div class="search-form__group">
+              <i class="fa-solid fa-location-dot search-form__icon" aria-hidden="true"></i>
+              <div class="search-form__input-wrapper">
+                <label for="distrito" class="search-form__label">Distrito</label>
+                <select id="distrito" class="search-form__select" aria-required="true" name="distrito" disabled>
+                  <option value="" disabled selected>Selecciona Distrito</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="search-form__divider" aria-hidden="true"></div>
+
+            <!-- Grupo Oficio -->
+            <div class="search-form__group">
+              <i class="fa-solid fa-briefcase search-form__icon" aria-hidden="true"></i>
+              <div class="search-form__input-wrapper">
+                <label for="input-oficio" class="search-form__label">¿Qué oficio necesitas?</label>
+                <select id="input-oficio" class="search-form__select" aria-required="true" name="oficio">
+                  <option value="" disabled selected>Selecciona el Oficio</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Botón de Envío -->
+            <button type="submit" class="btn btn--primary search-form__submit" id="btn-search-submit" aria-label="Buscar técnicos calificados">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <span>Buscar Técnico</span>
+            </button>
+
+          </form>
+
+          <!-- Contenedor de Error Preparado (WCAG 2.1 AA - Oculto por defecto) -->
+          <div id="error-search" role="alert" class="alert-error mx-auto mt-3 max-w-xl" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            <span>Por favor, seleccione departamento, provincia, distrito y el oficio que necesita.</span>
+          </div>
+
+        </div>
+
+        <figure class="hero__visual animate-fade-in delay-200">
+          <img
+            src="frontend/assets/img/hero-badge.png"
+            alt="Técnicos certificados en todo el Perú"
+            class="hero__img"
+            width="480"
+            height="320"
+            loading="eager">
+        </figure>
+      </div>
+    </section>
+
+    <!-- 3. SECCIÓN BENEFICIOS (¿Por qué elegirnos?) -->
+    <section class="benefits" id="beneficios" aria-labelledby="benefits-title">
+      <div class="container-custom">
+        
+        <!-- Cabecera de la Sección -->
+        <div class="benefits__header">
+          <h2 class="benefits__title" id="benefits-title">Oficios Seguros, Hogares Tranquilos</h2>
+          <p class="benefits__subtitle">Desarrollamos una plataforma moderna y ágil que elimina la incertidumbre al contratar servicios técnicos en tu ciudad.</p>
+        </div>
+
+        <!-- Rejilla de Columnas -->
+        <div class="benefits__grid animate-staggered" id="benefits-grid">
+          
+          <!-- Beneficio 1: Seguridad -->
+          <article class="benefit-card h-100" id="card-benefit-seguridad">
+            <div class="benefit-card__icon-container animate-float" aria-hidden="true">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="benefit-card__title">Seguridad Absoluta</h3>
+            <p class="benefit-card__description">
+              Revisamos exhaustivamente los antecedentes policiales, penales y fiscales de cada técnico antes de habilitar su perfil en el catálogo nacional de servicios.
+            </p>
+          </article>
+
+          <!-- Beneficio 2: Eficiencia -->
+          <article class="benefit-card h-100" id="card-benefit-eficiencia">
+            <div class="benefit-card__icon-container animate-float delay-100" aria-hidden="true">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="benefit-card__title">Eficiencia SaaS</h3>
+            <p class="benefit-card__description">
+              Solicita presupuestos digitales, agenda turnos en línea y realiza la coordinación directamente en un chat seguro y dinámico optimizado para móviles.
+            </p>
+          </article>
+
+          <!-- Beneficio 3: Confianza -->
+          <article class="benefit-card h-100" id="card-benefit-confianza">
+            <div class="benefit-card__icon-container animate-float delay-200" aria-hidden="true">
+              <i class="fa-solid fa-star-half-stroke"></i>
+            </div>
+            <h3 class="benefit-card__title">Respaldo y Confianza</h3>
+            <p class="benefit-card__description">
+              Accede a valoraciones verificadas, comentarios reales e histórico detallado de obras hechas por los técnicos para tomar decisiones totalmente informadas.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CATÁLOGO DESTACADO (Técnicos recomendados con CSS Grid) -->
+    <section class="catalog-section" aria-labelledby="catalog-title">
+      <div class="container-custom">
+        
+        <!-- Cabecera de Catálogo -->
+        <div class="catalog-section__header-row">
+          <div class="catalog-section__title-group">
+            <h2 class="catalog-section__title" id="catalog-title">Técnicos Destacados de la Semana</h2>
+            <p class="catalog-section__subtitle">Los profesionales mejor calificados de nuestra comunidad, listos para atender urgencias y mantenimientos generales.</p>
+          </div>
+          <a href="frontend/pages/catalogo.html" class="btn btn--outline" id="btn-view-all-technicians">
+            <span>Ver Catálogo Completo</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <!-- Contenedor Grid (.catalog-grid) -->
+        <div class="catalog-grid" id="featured-catalog-grid">
+          
+          <!-- Técnico 1: Pedro Huamán -->
+          <article class="card-tech" id="tech-card-01">
+            <div class="card-tech__img-container">
+              <img class="card-tech__img" src="frontend/assets/img/perfil.jpg" alt="Pedro Huamán operando un tablero de distribución eléctrica residencial" loading="lazy">
+              <span class="card-tech__status" aria-label="Pedro está en línea actualmente">
+                <span class="card-tech__status-dot" aria-hidden="true"></span>En Línea
+              </span>
+              <span class="card-tech__badge">Electricista</span>
+            </div>
+            <div class="card-tech__body">
+              <div class="card-tech__header">
+                <h3 class="card-tech__name">Pedro Huamán</h3>
+                <div class="card-tech__rating" aria-label="Calificación estelar de 5.0 basada en 142 valoraciones">
+                  <i class="fa-solid fa-star" aria-hidden="true"></i>
+                  <span>5.0</span>
+                  <span class="card-tech__rating-count">(142)</span>
+                </div>
+              </div>
+              <div class="card-tech__location">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span>Lima Metropolitana, San Miguel</span>
+              </div>
+              <p class="card-tech__text">
+                Ingeniero Técnico Electricista con más de 12 años de trayectoria. Especializado en tendidos eléctricos internos, balance de cargas e instalación de redes pozo a tierra.
+              </p>
+              <div class="card-tech__tags" aria-label="Especialidades técnicas">
+                <span class="card-tech__tag">Instalaciones</span>
+                <span class="card-tech__tag">Urgencias</span>
+                <span class="card-tech__tag">Pozo a Tierra</span>
+              </div>
+              <a href="frontend/pages/producto.html?id=1" class="btn btn--outline card-tech__btn" id="btn-view-profile-1">Ver Perfil Técnico</a>
+            </div>
+          </article>
+
+          <!-- Técnico 2: Sofía Mendoza -->
+          <article class="card-tech" id="tech-card-02">
+            <div class="card-tech__img-container">
+              <img class="card-tech__img" src="frontend/assets/img/perfil.jpg" alt="Sofía Mendoza ensamblando tuberías de cobre para termo de agua" loading="lazy">
+              <span class="card-tech__status" aria-label="Sofía está en línea actualmente">
+                <span class="card-tech__status-dot" aria-hidden="true"></span>En Línea
+              </span>
+              <span class="card-tech__badge">Gasfitería Sanitaria</span>
+            </div>
+            <div class="card-tech__body">
+              <div class="card-tech__header">
+                <h3 class="card-tech__name">Sofía Mendoza</h3>
+                <div class="card-tech__rating" aria-label="Calificación estelar de 4.9 basada en 98 valoraciones">
+                  <i class="fa-solid fa-star" aria-hidden="true"></i>
+                  <span>4.9</span>
+                  <span class="card-tech__rating-count">(98)</span>
+                </div>
+              </div>
+              <div class="card-tech__location">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span>Miraflores & San Isidro, Lima</span>
+              </div>
+              <p class="card-tech__text">
+                Técnica certificada de SENCICO. Experta en detección ultrasónica de fugas de agua invisibles, reparación de tuberías de alta presión y mantenimiento general de griferías.
+              </p>
+              <div class="card-tech__tags" aria-label="Especialidades técnicas">
+                <span class="card-tech__tag">Detector Fugas</span>
+                <span class="card-tech__tag">SENCICO</span>
+                <span class="card-tech__tag">Grifería Premium</span>
+              </div>
+              <a href="frontend/pages/producto.html?id=2" class="btn btn--outline card-tech__btn" id="btn-view-profile-2">Ver Perfil Técnico</a>
+            </div>
+          </article>
+
+          <!-- Técnico 3: Marcos Quispe -->
+          <article class="card-tech" id="tech-card-03">
+            <div class="card-tech__img-container">
+              <img class="card-tech__img" src="frontend/assets/img/perfil.jpg" alt="Marcos Quispe cepillando superficie de madera maciza para acabados finos" loading="lazy">
+              <span class="card-tech__status" aria-label="Marcos está en línea actualmente">
+                <span class="card-tech__status-dot" aria-hidden="true"></span>En Línea
+              </span>
+              <span class="card-tech__badge">Carpeta & Melamina</span>
+            </div>
+            <div class="card-tech__body">
+              <div class="card-tech__header">
+                <h3 class="card-tech__name">Marcos Quispe</h3>
+                <div class="card-tech__rating" aria-label="Calificación estelar de 4.8 basada en 76 valoraciones">
+                  <i class="fa-solid fa-star" aria-hidden="true"></i>
+                  <span>4.8</span>
+                  <span class="card-tech__rating-count">(76)</span>
+                </div>
+              </div>
+              <div class="card-tech__location">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span>Arequipa Metropolitana, Yanahuara</span>
+              </div>
+              <p class="card-tech__text">
+                Ebanista artesanal y armador de muebles modulares en melamina. Estructuras sólidas a medida, instalación de bisagras hidráulicas y reparación de estructuras de madera fina.
+              </p>
+              <div class="card-tech__tags" aria-label="Especialidades técnicas">
+                <span class="card-tech__tag">Melamina</span>
+                <span class="card-tech__tag">Diseño a Medida</span>
+                <span class="card-tech__tag">Ebanistería</span>
+              </div>
+              <a href="frontend/pages/producto.html?id=3" class="btn btn--outline card-tech__btn" id="btn-view-profile-3">Ver Perfil Técnico</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SECCIÓN TESTIMONIOS (Visualmente Impecable) -->
+    <section class="testimonials" id="testimonios" aria-labelledby="testimonials-title">
+      <div class="container-custom">
+        
+        <!-- Cabecera de la Sección -->
+        <div class="testimonials__header">
+          <h2 class="testimonials__title" id="testimonials-title">Nuestra Comunidad Opina</h2>
+          <p class="testimonials__subtitle">Clientes y dueños de negocios en todo el Perú que encontraron al profesional técnico ideal a través de nuestro SaaS.</p>
+        </div>
+
+        <!-- Bloque de Tarjetas Testimoniales -->
+        <div class="testimonials__grid" id="testimonials-deck">
+          
+          <!-- Testimonio 1 -->
+          <article class="testimonial-card" id="testimonial-card-1">
+            <div class="testimonial-card__stars" aria-label="Servicio de 5 estrellas">
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+            </div>
+            <p class="testimonial-card__quote">
+              "Contratamos a Pedro Huamán para reformar todo el tablero eléctrico de nuestro hostal en Miraflores. Impecable servicio, transparente y con factura electrónica oficial. Un acierto Oficios Perú."
+            </p>
+            <div class="testimonial-card__user">
+              <div class="testimonial-card__avatar" aria-hidden="true">EA</div>
+              <div>
+                <span class="testimonial-card__name">Eduardo Arrieta</span>
+                <p class="testimonial-card__role">Gestor de Hostales Turísticos</p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Testimonio 2 -->
+          <article class="testimonial-card" id="testimonial-card-2">
+            <div class="testimonial-card__stars" aria-label="Servicio de 5 estrellas">
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+            </div>
+            <p class="testimonial-card__quote">
+              "Sofía Mendoza resolvió en tiempo récord una filtración que amenazaba con dañar el departamento de abajo. Su honestidad y uso de tecnología ultrasónica me ahorró picar toda la pared entera."
+            </p>
+            <div class="testimonial-card__user">
+              <div class="testimonial-card__avatar" aria-hidden="true">VC</div>
+              <div>
+                <span class="testimonial-card__name">Vanessa Choy</span>
+                <p class="testimonial-card__role">Propietaria Residente</p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Testimonio 3 -->
+          <article class="testimonial-card" id="testimonial-card-3">
+            <div class="testimonial-card__stars" aria-label="Servicio de 4.8 estrellas">
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <i class="fa-solid fa-half-stroke" aria-hidden="true"></i>
+            </div>
+            <p class="testimonial-card__quote">
+              "El carpintero Marcos Quispe armó y fijó todos los organizadores empotrados de mi oficina. Acabado fino y un trato sumamente profesional. Definitivamente volveré a buscar técnicos por aquí."
+            </p>
+            <div class="testimonial-card__user">
+              <div class="testimonial-card__avatar" aria-hidden="true">RA</div>
+              <div>
+                <span class="testimonial-card__name">Roberto Alvarado</span>
+                <p class="testimonial-card__role">Abogado Asociado</p>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. FOOTER (Información de la marca, enlaces rápidos y contacto) -->
+  <footer class="footer" aria-label="Pie de página">
+    <div class="container-custom">
+      
+      <div class="footer__main-grid">
+        
+        <!-- Identitad de Marca -->
+        <section class="footer__brand" aria-label="Acerca de Oficios Perú">
+          <div class="footer__logo">
+            <svg class="navbar__logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" role="img" aria-label="Oficios Perú">
+              <title>Oficios Perú</title>
+              <path fill="var(--color-accent)" d="M32.5 2.5c-1.2-1.2-3.2-1.2-4.5 0L26 4.5l2 2-8.5 8.5c-.8-.3-1.6-.5-2.5-.5-3.9 0-7 3.1-7 7s3.1 7 7 7c.9 0 1.7-.2 2.5-.5l8.5 8.5-2 2 2.5 2.5c1.2 1.2 3.2 1.2 4.5 0l3-3-15-15 3-3zm-13 19c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z" transform="translate(4, 4)"/>
+              <text x="52" y="33" font-family="Poppins, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.5">
+                <tspan fill="currentColor">Oficios</tspan><tspan fill="var(--color-accent)">Perú</tspan>
+              </text>
+            </svg>
+          </div>
+          <p class="footer__brand-text">
+            La plataforma SaaS líder en el Perú para la conexión y contratación segura de técnicos y prestadores de servicios calificados para tu hogar o empresa.
+          </p>
+          <div class="footer__socials" aria-label="Redes sociales">
+            <a href="#" class="footer__social-link" aria-label="Facebook de Oficios Perú"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="footer__social-link" aria-label="LinkedIn de Oficios Perú"><i class="fa-brands fa-linkedin-in"></i></a>
+            <a href="#" class="footer__social-link" aria-label="Instagram de Oficios Perú"><i class="fa-brands fa-instagram"></i></a>
+          </div>
+        </section>
+
+        <!-- Enlaces Rápidos -->
+        <nav class="footer__column" aria-label="Enlaces rápidos de navegación">
+          <h3 class="footer__title">Navegación</h3>
+          <ul class="footer__links">
+            <li><a href="#" class="footer__link">Inicio</a></li>
+            <li><a href="frontend/pages/catalogo.html" class="footer__link">Ver Catálogo</a></li>
+            <li><a href="#beneficios" class="footer__link">¿Por qué elegirnos?</a></li>
+            <li><a href="#testimonios" class="footer__link">Opiniones</a></li>
+          </ul>
+        </nav>
+
+        <!-- Soporte e Información -->
+        <nav class="footer__column" aria-label="Soporte y recursos">
+          <h3 class="footer__title">Oficios S.A.C.</h3>
+          <ul class="footer__links">
+            <li><a href="#" class="footer__link">Preguntas Frecuentes</a></li>
+            <li><a href="#" class="footer__link">Cómo Funciona</a></li>
+            <li><a href="#" class="footer__link">Centro de Ayuda</a></li>
+            <li><a href="#" class="footer__link">Registrarse como Técnico</a></li>
+          </ul>
+        </nav>
+
+        <!-- Información de Contacto -->
+        <section class="footer__column" aria-label="Información de contacto oficial">
+          <h3 class="footer__title">Contacto Oficial</h3>
+          <div class="footer__contact-item">
+            <i class="fa-solid fa-location-dot footer__contact-icon" aria-hidden="true"></i>
+            <span>Av. Javier Prado Este 2450, San Borja, Lima, Perú</span>
+          </div>
+          <div class="footer__contact-item">
+            <i class="fa-solid fa-phone footer__contact-icon" aria-hidden="true"></i>
+            <span>(+51) 1 480-1234</span>
+          </div>
+          <div class="footer__contact-item">
+            <i class="fa-solid fa-envelope footer__contact-icon" aria-hidden="true"></i>
+            <span>soporte@oficiosperu.pe</span>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Barra de Copyright e Información Legal -->
+      <div class="footer__bar">
+        <p class="footer__copyright">
+          &copy; 2026 Oficios Perú S.A.C. Todos los derechos reservados. Desarrollado bajo la Unidad 2.
+        </p>
+        <div class="footer__legal-links">
+          <a href="#" class="footer__legal-link">Términos y Condiciones</a>
+          <a href="#" class="footer__legal-link">Políticas de Privacidad</a>
+          <a href="#" class="footer__legal-link">Libro de Reclamaciones</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Vinculación de Archivos JS para Unidad 3 -->
+  <script src="frontend/js/darkmode.js"></script>
+  <script src="frontend/js/ubigeo.js"></script>
+  <script src="frontend/js/api.js"></script>
+  <script src="frontend/js/dom.js"></script>
+  <script src="frontend/js/main.js"></script>
+
+</body>
+</html>
