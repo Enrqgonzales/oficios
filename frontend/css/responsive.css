@@ -19,6 +19,7 @@
 }
 
 /* 1. DISPOSITIVOS MÓVILES EXTREMADAMENTE PEQUEÑOS (<= 360px) */
+/* --- EXP-P3: DISEÑO RESPONSIVO (media query móvil + font-size relativo) --- */
 @media (max-width: 360px) {
   :root {
     html {
@@ -83,6 +84,7 @@
   .benefits__grid,
   .catalog-grid,
   .testimonials__grid {
+    /* --- EXP-P3: DISEÑO RESPONSIVO (grids colapsan a 1 columna en móvil) --- */
     grid-template-columns: 1fr; /* Asegurar 1 sola columna pura */
     gap: 1.5rem;
   }

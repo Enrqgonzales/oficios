@@ -3,6 +3,7 @@
    ========================================================================== */
 
 /* 1. IMPORTACIONES & TIPOGRAFÍA */
+/* --- EXP-P1: ESTILOS AVANZADOS (FUENTES LOCALES @font-face) --- */
 @font-face {
   font-family: 'Poppins';
   src: url('../assets/fonts/Poppins-Regular.woff2') format('woff2');
@@ -28,6 +29,7 @@
 }
 
 /* 2. VARIABLES DEL SISTEMA DE DISEÑO (ESTILO GEMINI) */
+/* --- EXP-P1: ESTILOS AVANZADOS (VARIABLES CSS :root) --- */
 :root {
   /* Tipografía */
   --font-primary: 'Poppins', sans-serif;
@@ -54,6 +56,7 @@
 }
 
 /* Modo Oscuro Nativo + Toggle Manual (.dark-theme / .light-theme) */
+/* --- EXP-P3: DISEÑO RESPONSIVO (DARK MODE - prefers-color-scheme) --- */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-base: #131314;
@@ -72,6 +75,7 @@
   }
 }
 
+/* --- EXP-P3: DISEÑO RESPONSIVO (DARK MODE - toggle manual .dark-theme) --- */
 body.dark-theme {
   --bg-base: #131314;
   --bg-surface: #1E1F20;
@@ -188,6 +192,7 @@ button, input, select, textarea {
   transition: var(--transition-smooth);
 }
 
+/* --- EXP-P4: LAYOUT FLEXBOX (NAVBAR - logo, menú y acciones) --- */
 .navbar__wrapper {
   display: flex;
   align-items: center;
@@ -261,6 +266,7 @@ body.dark-theme .navbar__logo-img {
   color: var(--text-primary);
 }
 
+/* --- EXP-P2: ANIMACIONES (TRANSICIÓN hover en enlaces navbar) --- */
 .navbar__link::after {
   content: '';
   position: absolute;
@@ -671,6 +677,7 @@ body.light-theme #distrito {
   font-size: 1rem;
 }
 
+/* --- EXP-P4: LAYOUT GRID (TARJETAS DE BENEFICIOS - auto-fit/minmax) --- */
 .benefits__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -685,6 +692,7 @@ body.light-theme #distrito {
   transition: var(--transition-smooth);
 }
 
+/* --- EXP-P2: ANIMACIONES (HOVER transform en tarjetas de beneficios) --- */
 .benefit-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
@@ -760,6 +768,7 @@ body.light-theme #distrito {
 }
 
 /* Grid del catálogo */
+/* --- EXP-P4: LAYOUT GRID (TARJETAS DE TÉCNICOS - auto-fill/minmax) --- */
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -777,6 +786,7 @@ body.light-theme #distrito {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* --- EXP-P2: ANIMACIONES (HOVER transform en tarjetas de técnicos) --- */
 .card-tech:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: var(--shadow-lg);
@@ -1048,6 +1058,7 @@ body.dark-theme .testimonial-card__avatar {
   font-size: 0.9rem;
 }
 
+/* --- EXP-P4: LAYOUT GRID (FOOTER - columnas proporcionales 2fr/1fr) --- */
 .footer__main-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

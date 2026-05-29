@@ -3,6 +3,7 @@
    ========================================================================== */
 
 /* Fade In Base */
+/* --- EXP-P2: ANIMACIONES (@keyframes fadeIn) --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -84,6 +85,7 @@
 }
 
 /* Clases Helper de Animación */
+/* --- EXP-P2: ANIMACIONES (clases helper + animation-delay stagger) --- */
 .animate-fade-in {
   animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
