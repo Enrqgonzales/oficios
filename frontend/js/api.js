@@ -33,6 +33,7 @@ function obtenerRutaAPI() {
 async function realizarPeticion(urlCompleta, metodo, cuerpoDatos) {
   const opciones = {
     method: metodo,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -107,6 +108,13 @@ const ApiService = {
   },
 
   /**
+   * Cierra la sesión activa en el servidor.
+   */
+  async logout() {
+    return this.enviarPost('logout', null);
+  },
+
+  /**
    * Registra un nuevo usuario (cliente o técnico) con datos de ubigeo.
    */
   async registrar(datosUsuario) {
@@ -161,6 +169,7 @@ const ApiService = {
     try {
       respuesta = await fetch(url, {
         method: 'POST',
+        credentials: 'include',
         body: formData
       });
     } catch (errorRed) {

@@ -2,6 +2,8 @@
  * dom.js - Manipulación del DOM y diseño responsivo interactivo de Oficios Perú.
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificar si se abrió mediante protocolo de archivo local file://
+    checkFileProtocol();
     // Inicializar menú hamburguesa
     initMobileMenu();
     // Inicializar cierre de modales generales al hacer click fuera o ESC
@@ -146,6 +148,63 @@ function initGlobalModalHandlers() {
             });
         }
     });
+}
+
+/**
+ * Muestra un banner flotante y animado si la página se carga vía file:// en vez de localhost.
+ */
+function checkFileProtocol() {
+    if (window.location.protocol === 'file:') {
+        const banner = document.createElement('div');
+        banner.id = 'protocol-warning-banner';
+        banner.className = 'animate-slide-down';
+        banner.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: #ffffff;
+            text-align: center;
+            padding: 14px 24px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-bottom: 3px solid #d84315;
+            transition: all 0.3s ease;
+        `;
+        
+        banner.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; text-align: left; line-height: 1.4;">
+                <i class="fa-solid fa-circle-exclamation" style="font-size: 18px; color: #fff;"></i>
+                <span><strong>Aviso de Protocolo Local:</strong> Has abierto la aplicación usando <code>file://</code>. Para que los servicios PHP y la base de datos funcionen, debes acceder a través de tu servidor local en: <a href="http://localhost/oficios/" style="color: #ffffff; text-decoration: underline; font-weight: 700; margin-left: 5px;">http://localhost/oficios/</a></span>
+            </div>
+            <button onclick="document.getElementById('protocol-warning-banner').style.transform='translateY(-100%)'; setTimeout(() => document.getElementById('protocol-warning-banner').remove(), 300); document.body.style.paddingTop = '0px';" style="
+                background: rgba(255,255,255,0.2);
+                border: none;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                cursor: pointer;
+                color: #ffffff;
+                font-weight: bold;
+                margin-left: 15px;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='rgba(255,255,255,0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+        `;
+        document.body.prepend(banner);
+        document.body.style.paddingTop = '55px';
+    }
 }
 
 // Exportar funciones del DOM globalmente

@@ -8,10 +8,43 @@
  *   4. Respuestas siempre en JSON con códigos HTTP correctos.
  */
 
+// Configurar y arrancar sesión de forma segura
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+        ini_set('session.cookie_secure', 1);
+    }
+    session_start();
+}
+
 // ---------------------------------------------------------------------------
-// BLOQUE 1: Cabeceras HTTP comunes (CORS y JSON)
+// BLOQUE 1: Cabeceras HTTP comunes (CORS dinámico y JSON)
 // ---------------------------------------------------------------------------
-header('Access-Control-Allow-Origin: *');
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    $allowed_origins = [
+        'http://localhost',
+        'http://127.0.0.1',
+        'https://localhost',
+        'https://127.0.0.1'
+    ];
+    $origin = $_SERVER['HTTP_ORIGIN'];
+    $originClean = rtrim($origin, '/');
+    
+    // Permitir subdominios de localhost o puertos de desarrollo dinámicos
+    $esLocalhost = (strpos($originClean, 'http://localhost') === 0) || 
+                   (strpos($originClean, 'https://localhost') === 0) || 
+                   (strpos($originClean, 'http://127.0.0.1') === 0) || 
+                   (strpos($originClean, 'https://127.0.0.1') === 0);
+                   
+    if ($esLocalhost || in_array($originClean, $allowed_origins, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Credentials: true');
+    } else {
+        header('Access-Control-Allow-Origin: null');
+    }
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
@@ -33,6 +66,10 @@ $accionSolicitada = isset($_GET['action']) ? trim($_GET['action']) : '';
 switch ($accionSolicitada) {
     case 'login':
         procesarLogin($pdo);
+        break;
+
+    case 'logout':
+        procesarLogout();
         break;
 
     case 'registro':
@@ -66,7 +103,7 @@ switch ($accionSolicitada) {
     default:
         responderJSON(404, [
             'success' => false,
-            'message' => 'Acción API no reconocida. Use ?action=login, registro, tecnicos, tecnico, servicios, resenas, crear_resena u ofrecer_servicio.'
+            'message' => 'Acción API no reconocida. Use ?action=login, logout, registro, tecnicos, tecnico, servicios, resenas, crear_resena u ofrecer_servicio.'
         ]);
         break;
 }
@@ -183,6 +220,8 @@ function procesarLogin($pdo) {
         $usuarioEncontrado = $sentencia->fetch();
 
         if (!$usuarioEncontrado || !password_verify($password, $usuarioEncontrado['password_hash'])) {
+            // Mitigar ataques de fuerza bruta ralentizando intentos fallidos secuenciales
+            sleep(1);
             responderJSON(401, [
                 'success' => false,
                 'message' => 'Credenciales incorrectas: correo o contraseña inválidos.'
@@ -191,6 +230,14 @@ function procesarLogin($pdo) {
 
         // Nunca devolver el hash de la contraseña al cliente
         unset($usuarioEncontrado['password_hash']);
+
+        // Guardar la sesión de usuario en el servidor
+        $_SESSION['usuario'] = [
+            'id' => (int) $usuarioEncontrado['id'],
+            'rol' => $usuarioEncontrado['rol'],
+            'nombre' => $usuarioEncontrado['nombre'],
+            'email' => $usuarioEncontrado['email']
+        ];
 
         $rutaRedireccion = 'catalogo.html';
 
@@ -509,6 +556,21 @@ function procesarCrearResena($pdo) {
     $calificacion = isset($datos['calificacion']) ? (int) $datos['calificacion'] : 0;
     $comentario = limpiarEntrada($datos['comentario'] ?? '');
 
+    // Validar sesión activa y correspondencia de cliente
+    if (!isset($_SESSION['usuario'])) {
+        responderJSON(401, [
+            'success' => false,
+            'message' => 'No autorizado. Debe iniciar sesión para dejar una reseña.'
+        ]);
+    }
+
+    if ((int) $_SESSION['usuario']['id'] !== $idCliente) {
+        responderJSON(403, [
+            'success' => false,
+            'message' => 'No autorizado. La reseña debe corresponder al usuario autenticado.'
+        ]);
+    }
+
     // Validaciones de negocio
     if ($idTecnico <= 0 || $idCliente <= 0) {
         responderJSON(400, [
@@ -589,10 +651,18 @@ function procesarOfrecerServicio($pdo) {
     $distrito = limpiarEntrada($_POST['distrito'] ?? '');
     $descripcion = limpiarEntrada($_POST['descripcion'] ?? '');
 
-    if ($idUsuario <= 0) {
-        responderJSON(400, [
+    // Validar sesión activa y correspondencia de usuario
+    if (!isset($_SESSION['usuario'])) {
+        responderJSON(401, [
             'success' => false,
-            'message' => 'Debe iniciar sesión para publicar su oficio.'
+            'message' => 'No autorizado. Debe iniciar sesión para publicar su oficio.'
+        ]);
+    }
+
+    if ((int) $_SESSION['usuario']['id'] !== $idUsuario) {
+        responderJSON(403, [
+            'success' => false,
+            'message' => 'No autorizado. El perfil debe pertenecer al usuario autenticado.'
         ]);
     }
 
@@ -762,4 +832,23 @@ function procesarOfrecerServicio($pdo) {
 
         responderJSON(500, armarErrorServidor('Error al publicar el oficio en el servidor.', $e));
     }
+}
+
+/**
+ * Cierra la sesión de usuario en el servidor, limpia el arreglo $_SESSION y destruye la cookie de sesión.
+ */
+function procesarLogout() {
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    session_destroy();
+    responderJSON(200, [
+        'success' => true,
+        'message' => 'Sesión cerrada con éxito en el servidor.'
+    ]);
 }

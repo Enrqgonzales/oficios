@@ -462,6 +462,8 @@ function initCatalogLogic() {
             : 'frontend/assets/img/perfil.jpg';
         const subioFoto = tech.imagen && tech.imagen.indexOf('/uploads/') !== -1;
         const imageSrc = subioFoto ? tech.imagen : perfilDefault;
+        const idInt = parseInt(tech.id, 10);
+        const favoritoClase = esFavorito(idInt) ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
 
         return `
             <article class="card-tech animate-fade-in">
@@ -471,6 +473,9 @@ function initCatalogLogic() {
                         <span class="card-tech__status-dot" style="${estadoDotStyle}"></span>${estadoLabel}
                     </span>
                     <span class="card-tech__badge">${tech.especialidad}</span>
+                    <button type="button" class="card-tech__fav-btn" data-id="${tech.id}" aria-label="Guardar en favoritos">
+                        <i class="${favoritoClase}"></i>
+                    </button>
                 </div>
                 <div class="card-tech__body">
                     <div class="card-tech__header">
@@ -544,6 +549,13 @@ function initCatalogLogic() {
             if (res && res.success && res.data && res.data.length > 0) {
                 let listaTecnicos = res.data;
 
+                // Filtrar por favoritos en memoria (localStorage) si el checkbox de favoritos está activo
+                const filterFav = document.getElementById('filter-favorites');
+                if (filterFav && filterFav.checked) {
+                    const favs = obtenerFavoritos();
+                    listaTecnicos = listaTecnicos.filter(tech => favs.includes(parseInt(tech.id, 10)));
+                }
+
                 // Filtrado adicional por oficio si llegó desde el hero (búsqueda por texto)
                 if (parametrosEntrada.oficio) {
                     const textoOficio = parametrosEntrada.oficio.toLowerCase();
@@ -585,6 +597,12 @@ function initCatalogLogic() {
             selects.forEach(select => {
                 select.addEventListener('change', loadFilteredData);
             });
+
+            // Escuchar cambios en el checkbox de favoritos
+            const checkboxFav = document.getElementById('filter-favorites');
+            if (checkboxFav) {
+                checkboxFav.addEventListener('change', loadFilteredData);
+            }
             
             // Reemplazar el botón onclick del mockup
             const btnFilter = filterForm.querySelector('button');
@@ -1072,9 +1090,83 @@ function initAuthNav() {
     contenedorAcciones.appendChild(btnCatalogo);
     contenedorAcciones.appendChild(btnLogout);
 
-    btnLogout.addEventListener('click', () => {
+    btnLogout.addEventListener('click', async () => {
+        try {
+            if (window.ApiService && typeof window.ApiService.logout === 'function') {
+                await window.ApiService.logout();
+            }
+        } catch (error) {
+            console.error('Error al cerrar sesión en el servidor:', error);
+        }
         sessionStorage.removeItem('of_user');
         const rutaInicio = enPaginasInternas ? '../../index.html' : 'index.html';
         window.location.href = rutaInicio;
     });
 }
+
+// ============================================================================
+// LÓGICA DE TÉCNICOS FAVORITOS (LOCALSTORAGE)
+// ============================================================================
+
+// OBTENER FAVORITOS DESDE LOCALSTORAGE
+function obtenerFavoritos() {
+    const favs = localStorage.getItem('of_favorites');
+    if (!favs) return [];
+    try {
+        return JSON.parse(favs);
+    } catch (e) {
+        return [];
+    }
+}
+
+// GUARDAR FAVORITOS EN LOCALSTORAGE
+function guardarFavoritos(favs) {
+    localStorage.setItem('of_favorites', JSON.stringify(favs));
+}
+
+// COMPROBAR SI UN ID ES FAVORITO
+function esFavorito(id) {
+    const favs = obtenerFavoritos();
+    return favs.includes(parseInt(id, 10));
+}
+
+// CAMBIAR ESTADO FAVORITO DE UN TÉCNICO
+function toggleFavorito(id) {
+    let favs = obtenerFavoritos();
+    const idInt = parseInt(id, 10);
+    if (favs.includes(idInt)) {
+        favs = favs.filter(fId => fId !== idInt);
+    } else {
+        favs.push(idInt);
+    }
+    guardarFavoritos(favs);
+}
+
+// GESTIONAR CLICK EN EL BOTÓN DE FAVORITO POR EVENT DELEGATION
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.card-tech__fav-btn');
+    if (!btn) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const id = btn.getAttribute('data-id');
+    toggleFavorito(id);
+    
+    // Cambiar icono
+    const icon = btn.querySelector('i');
+    if (icon) {
+        if (esFavorito(id)) {
+            icon.className = 'fa-solid fa-heart';
+        } else {
+            icon.className = 'fa-regular fa-heart';
+        }
+    }
+    
+    // Si estamos en la página del catálogo y el filtro de favoritos está activo, recargar los datos
+    const filterFav = document.getElementById('filter-favorites');
+    if (filterFav && filterFav.checked) {
+        const event = new Event('change');
+        filterFav.dispatchEvent(event);
+    }
+});

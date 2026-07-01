@@ -1,0 +1,11 @@
+# Impedir la ejecución de archivos PHP u otros scripts ejecutables
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pl|py|cgi|sh|asp|aspx)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Evitar que se puedan sobreescribir configuraciones mediante subida de archivos .htaccess
+<Files ~ "^\.ht">
+    Order allow,deny
+    Deny from all
+</Files>

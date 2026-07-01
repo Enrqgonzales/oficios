@@ -1251,3 +1251,35 @@ body.dark-theme .footer__social-link:hover {
 body.dark-theme .alert-error {
   background-color: rgba(244, 199, 199, 0.08);
 }
+
+/* Botón flotante para guardar en favoritos (❤️) */
+.card-tech__fav-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  transition: var(--transition-smooth);
+}
+
+.card-tech__fav-btn:hover {
+  transform: scale(1.1);
+  background-color: #FFFFFF;
+}
+
+body.dark-theme .card-tech__fav-btn {
+  background-color: rgba(30, 31, 32, 0.95);
+}
+
+body.dark-theme .card-tech__fav-btn:hover {
+  background-color: #1E1F20;
+}
