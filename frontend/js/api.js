@@ -160,6 +160,13 @@ const ApiService = {
   },
 
   /**
+   * Obtiene las estadísticas generales (agregación avanzada) de la plataforma.
+   */
+  async obtenerEstadisticas() {
+    return this.enviarGet('estadisticas', null);
+  },
+
+  /**
    * Publica o actualiza el perfil de técnico de un usuario (FormData con foto).
    */
   async ofrecerServicio(formData) {

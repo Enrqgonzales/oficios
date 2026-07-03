@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Si ya hay sesión, no mostrar pantallas de login/registro
     redirigirSiYaAutenticado();
+
+    // Inicializar estadísticas de la plataforma (agregación avanzada)
+    initEstadisticas();
 });
 
 /**
@@ -1091,6 +1094,11 @@ function initAuthNav() {
     contenedorAcciones.appendChild(btnLogout);
 
     btnLogout.addEventListener('click', async () => {
+        const confirmarCierre = confirm('¿Está seguro de que desea cerrar la sesión en Oficios Perú?');
+        if (!confirmarCierre) {
+            return;
+        }
+
         try {
             if (window.ApiService && typeof window.ApiService.logout === 'function') {
                 await window.ApiService.logout();
@@ -1170,3 +1178,36 @@ document.addEventListener('click', function(e) {
         filterFav.dispatchEvent(event);
     }
 });
+
+/**
+ * Inicializa la lógica de carga de estadísticas agregadas de la plataforma.
+ */
+function initEstadisticas() {
+    const statTecnicos = document.getElementById('stat-tecnicos');
+    const statResenas = document.getElementById('stat-resenas');
+    const statPromedio = document.getElementById('stat-promedio');
+
+    if (!statTecnicos || !statResenas || !statPromedio) {
+        return;
+    }
+
+    cargarEstadisticasPlataforma(statTecnicos, statResenas, statPromedio);
+}
+
+/**
+ * Llama al API para obtener las estadísticas agregadas y las pinta en el DOM.
+ */
+async function cargarEstadisticasPlataforma(elemTecnicos, elemResenas, elemPromedio) {
+    try {
+        if (window.ApiService && typeof window.ApiService.obtenerEstadisticas === 'function') {
+            const res = await window.ApiService.obtenerEstadisticas();
+            if (res && res.success && res.data) {
+                elemTecnicos.textContent = res.data.total_tecnicos;
+                elemResenas.textContent = res.data.total_resenas;
+                elemPromedio.textContent = parseFloat(res.data.promedio_general || 5.0).toFixed(1);
+            }
+        }
+    } catch (e) {
+        console.error('Error cargando estadísticas en la UI:', e);
+    }
+}

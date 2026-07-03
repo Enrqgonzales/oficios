@@ -1,0 +1,12 @@
+# Reglas e instrucciones del agente de IA (No subir al repositorio)
+.agents/
+
+# Archivos temporales de subidas de prueba
+frontend/assets/uploads/tecnico_*
+
+# Archivos de configuración de sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

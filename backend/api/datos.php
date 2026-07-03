@@ -100,10 +100,14 @@ switch ($accionSolicitada) {
         procesarOfrecerServicio($pdo);
         break;
 
+    case 'estadisticas':
+        procesarObtenerEstadisticas($pdo);
+        break;
+
     default:
         responderJSON(404, [
             'success' => false,
-            'message' => 'Acción API no reconocida. Use ?action=login, logout, registro, tecnicos, tecnico, servicios, resenas, crear_resena u ofrecer_servicio.'
+            'message' => 'Acción API no reconocida. Use ?action=login, logout, registro, tecnicos, tecnico, servicios, resenas, crear_resena, ofrecer_servicio u estadisticas.'
         ]);
         break;
 }
@@ -122,8 +126,7 @@ function limpiarEntrada($valor) {
     }
 
     $valorRecortado = trim((string) $valor);
-    $valorSinEtiquetas = strip_tags($valorRecortado);
-    return htmlspecialchars($valorSinEtiquetas, ENT_QUOTES, 'UTF-8');
+    return strip_tags($valorRecortado);
 }
 
 /**
@@ -317,9 +320,6 @@ function procesarRegistro($pdo) {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        // Transacción para asegurar consistencia entre usuarios y tecnicos
-        $pdo->beginTransaction();
-
         // Insertar al usuario con sus datos de ubigeo
         $sqlUsuario = 'INSERT INTO usuarios (rol, nombre, email, celular, password_hash, departamento, provincia, distrito)
                        VALUES (:rol, :nombre, :email, :celular, :password_hash, :departamento, :provincia, :distrito)';
@@ -336,18 +336,12 @@ function procesarRegistro($pdo) {
             ':distrito' => $distrito
         ]);
 
-        $pdo->commit();
-
         responderJSON(201, [
             'success' => true,
             'message' => '¡Cuenta creada con éxito! Redirigiendo al inicio de sesión.'
         ]);
 
     } catch (PDOException $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-
         // Código 23000 = violación de UNIQUE (email duplicado)
         if ($e->getCode() === '23000') {
             responderJSON(409, [
@@ -851,4 +845,36 @@ function procesarLogout() {
         'success' => true,
         'message' => 'Sesión cerrada con éxito en el servidor.'
     ]);
+}
+
+/**
+ * Devuelve un resumen estadístico (agregación avanzada) de la plataforma.
+ */
+function procesarObtenerEstadisticas($pdo) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        responderJSON(405, ['success' => false, 'message' => 'Método no permitido. Use GET.']);
+    }
+
+    try {
+        $consulta = 'SELECT 
+                        (SELECT COUNT(*) FROM tecnicos) AS total_tecnicos,
+                        (SELECT COUNT(*) FROM resenas) AS total_resenas,
+                        (SELECT IFNULL(ROUND(AVG(calificacion), 1), 5.0) FROM resenas) AS promedio_general';
+        
+        $sentencia = $pdo->prepare($consulta);
+        $sentencia->execute();
+        $estadisticas = $sentencia->fetch();
+
+        responderJSON(200, [
+            'success' => true,
+            'data' => [
+                'total_tecnicos' => (int) $estadisticas['total_tecnicos'],
+                'total_resenas' => (int) $estadisticas['total_resenas'],
+                'promedio_general' => (float) $estadisticas['promedio_general']
+            ]
+        ]);
+
+    } catch (PDOException $e) {
+        responderJSON(500, armarErrorServidor('Error al consultar las estadísticas de la plataforma.', $e));
+    }
 }
