@@ -61,6 +61,7 @@ CREATE TABLE tecnicos (
     id_oficio INT DEFAULT NULL,
     especialidad VARCHAR(100) NOT NULL,
     ciudad VARCHAR(80) NOT NULL DEFAULT 'Lima',
+    provincia VARCHAR(80) NOT NULL DEFAULT 'Lima',
     distrito VARCHAR(80) NOT NULL,
     descripcion TEXT NULL,
     tags VARCHAR(255) NULL,
@@ -142,12 +143,12 @@ INSERT INTO usuarios (id, rol, nombre, email, celular, password_hash, departamen
 (8, 'client', 'Roberto Alvarado', 'r.alvarado@correo.pe', '966554433', '$2y$10$bm2sHULfqHLsbm.7GUr14.vCiuxxdVUBWmL4MX/A7MJU0LyLTYok.', 'Lima', 'Lima', 'San Borja');
 
 -- Perfiles públicos de técnicos (especialistas) asociados a sus usuarios
-INSERT INTO tecnicos (id_usuario, id_oficio, especialidad, ciudad, distrito, descripcion, tags, imagen, valoracion, resenas, online) VALUES
-(1, 1, 'Electricista', 'Lima', 'San Miguel', 'Ingeniero Técnico Electricista con más de 12 años de trayectoria. Especializado en tendidos eléctricos internos, balance de cargas e instalación de redes pozo a tierra.', 'Instalaciones, Urgencias, Pozo a Tierra', 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600', 5.0, 142, 1),
-(2, 2, 'Gasfitería Sanitaria', 'Lima', 'Miraflores', 'Técnica certificada de SENCICO. Experta en detección ultrasónica de fugas de agua invisibles, reparación de tuberías de alta presión y mantenimiento general de griferías.', 'Detector Fugas, SENCICO, Grifería Premium', 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600', 4.9, 98, 1),
-(3, 3, 'Carpintería & Melamina', 'Arequipa', 'Yanahuara', 'Ebanista artesanal y armador de muebles modulares en melamina. Estructuras sólidas a medida, instalación de bisagras hidráulicas y reparación de estructuras de madera fina.', 'Melamina, Diseño a Medida, Ebanistería', 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600', 4.8, 76, 1),
-(4, 4, 'Pintura e Interiores', 'Lima', 'La Molina', 'Servicios premium de pintura interior y exterior. Aplicación de estuco veneciano, texturados decorativos y tratamiento antihumedad en paredes y techos.', 'Pintura Látex, Estuco Veneciano, Impermeabilización', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600', 4.9, 112, 1),
-(5, 5, 'Soporte Línea Blanca', 'Lima', 'Santiago de Surco', 'Mantenimiento y reparación de refrigeradoras, cocinas industriales y lavadoras multimarca con repuestos originales.', 'Electrodomésticos, Línea Blanca, Repuestos', 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=600', 4.7, 84, 0);
+INSERT INTO tecnicos (id_usuario, id_oficio, especialidad, ciudad, provincia, distrito, descripcion, tags, imagen, valoracion, resenas, online) VALUES
+(1, 1, 'Electricista', 'Lima', 'Lima', 'San Miguel', 'Ingeniero Técnico Electricista con más de 12 años de trayectoria. Especializado en tendidos eléctricos internos, balance de cargas e instalación de redes pozo a tierra.', 'Instalaciones, Urgencias, Pozo a Tierra', 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600', 5.0, 142, 1),
+(2, 2, 'Gasfitería Sanitaria', 'Lima', 'Lima', 'Miraflores', 'Técnica certificada de SENCICO. Experta en detección ultrasónica de fugas de agua invisibles, reparación de tuberías de alta presión y mantenimiento general de griferías.', 'Detector Fugas, SENCICO, Grifería Premium', 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600', 4.9, 98, 1),
+(3, 3, 'Carpintería & Melamina', 'Arequipa', 'Arequipa', 'Yanahuara', 'Ebanista artesanal y armador de muebles modulares en melamina. Estructuras sólidas a medida, instalación de bisagras hidráulicas y reparación de estructuras de madera fina.', 'Melamina, Diseño a Medida, Ebanistería', 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600', 4.8, 76, 1),
+(4, 4, 'Pintura e Interiores', 'Lima', 'Lima', 'La Molina', 'Servicios premium de pintura interior y exterior. Aplicación de estuco veneciano, texturados decorativos y tratamiento antihumedad en paredes y techos.', 'Pintura Látex, Estuco Veneciano, Impermeabilización', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600', 4.9, 112, 1),
+(5, 5, 'Soporte Línea Blanca', 'Lima', 'Lima', 'Santiago de Surco', 'Mantenimiento y reparación de refrigeradoras, cocinas industriales y lavadoras multimarca con repuestos originales.', 'Electrodomésticos, Línea Blanca, Repuestos', 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=600', 4.7, 84, 0);
 
 -- Servicios concretos publicados por los técnicos (catálogo de tarifas)
 INSERT INTO servicios (id_tecnico, titulo, descripcion, precio_base, duracion_estimada) VALUES

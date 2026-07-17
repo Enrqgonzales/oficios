@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar formulario de publicar oficio
     initOfrecerForm();
 
+    // Inicializar gestión de servicios del técnico
+    initGestionServicios();
+
     // Inicializar búsqueda rápida del hero en la página de inicio
     initHeroSearchForm();
 
@@ -308,6 +311,21 @@ function initOfrecerForm() {
         return;
     }
 
+    // Si el usuario ya es técnico, actualizar los textos del encabezado del perfil
+    if (usuario.rol === 'tech') {
+        const card = form.closest('.auth-card');
+        if (card) {
+            const title = card.querySelector('.auth-card__title');
+            const subtitle = card.querySelector('.auth-card__subtitle');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (title) title.textContent = 'Editar mi Perfil de Oficio';
+            if (subtitle) subtitle.textContent = 'Actualiza tu especialidad y datos de contacto.';
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Actualizar mi Oficio';
+            }
+        }
+    }
+
     form.addEventListener('submit', async (evento) => {
         evento.preventDefault();
         clearFormErrors(form);
@@ -471,18 +489,18 @@ function initCatalogLogic() {
         return `
             <article class="card-tech animate-fade-in">
                 <div class="card-tech__img-container">
-                    <img class="card-tech__img" src="${imageSrc}" alt="${tech.nombre}" loading="lazy">
+                    <img class="card-tech__img" src="${imageSrc}" alt="${escaparHTML(tech.nombre || 'Técnico')}" loading="lazy">
                     <span class="card-tech__status" style="${estadoBadgeStyle}">
                         <span class="card-tech__status-dot" style="${estadoDotStyle}"></span>${estadoLabel}
                     </span>
-                    <span class="card-tech__badge">${tech.especialidad}</span>
+                    <span class="card-tech__badge">${escaparHTML(tech.especialidad || '')}</span>
                     <button type="button" class="card-tech__fav-btn" data-id="${tech.id}" aria-label="Guardar en favoritos">
                         <i class="${favoritoClase}"></i>
                     </button>
                 </div>
                 <div class="card-tech__body">
                     <div class="card-tech__header">
-                        <h3 class="card-tech__name">${tech.nombre}</h3>
+                        <h3 class="card-tech__name">${escaparHTML(tech.nombre || '')}</h3>
                         <div class="card-tech__rating">
                             <i class="fa-solid fa-star"></i>
                             <span>${rating}</span>
@@ -491,11 +509,11 @@ function initCatalogLogic() {
                     </div>
                     <div class="card-tech__location">
                         <i class="fa-solid fa-location-dot"></i>
-                        <span>${tech.ciudad || 'Lima'}, ${tech.distrito || ''}</span>
+                        <span>${escaparHTML(tech.ciudad || 'Lima')}${tech.provincia ? ', ' + escaparHTML(tech.provincia) : ''}, ${escaparHTML(tech.distrito || '')}</span>
                     </div>
-                    <p class="card-tech__text">${tech.descripcion || ''}</p>
+                    <p class="card-tech__text">${escaparHTML(tech.descripcion || '')}</p>
                     <div class="card-tech__tags">
-                        ${(tech.tags || '').split(',').map(tag => `<span class="card-tech__tag">${tag.trim()}</span>`).join('')}
+                        ${(tech.tags || '').split(',').map(tag => `<span class="card-tech__tag">${escaparHTML(tag.trim())}</span>`).join('')}
                     </div>
                     ${buttonHTML}
                 </div>
@@ -509,24 +527,81 @@ function initCatalogLogic() {
         const gridContainer = document.querySelector('.catalog-grid');
         const parametrosEntrada = leerParametrosURL();
 
-        // Si venimos desde el hero con parámetros GET, preseleccionar el filtro de departamento
+        const filterDep = document.getElementById('filter-dep');
+        const filterProv = document.getElementById('filter-prov');
+        const filterDist = document.getElementById('filter-dist');
+
+        // Inicializar cascada de filtros en el catálogo
+        if (filterDep && filterProv && filterDist) {
+            filterDep.addEventListener('change', () => {
+                const depto = filterDep.value;
+                if (depto === '') {
+                    reiniciarSelect('filter-prov', 'Todas las Provincias');
+                    reiniciarSelect('filter-dist', 'Todos los Distritos');
+                    filterProv.disabled = true;
+                    filterDist.disabled = true;
+                } else {
+                    const provs = obtenerProvincias(depto);
+                    poblarSelect('filter-prov', provs, 'Todas las Provincias');
+                    filterProv.disabled = false;
+                    reiniciarSelect('filter-dist', 'Todos los Distritos');
+                    filterDist.disabled = true;
+                }
+            });
+
+            filterProv.addEventListener('change', () => {
+                const depto = filterDep.value;
+                const prov = filterProv.value;
+                if (prov === '') {
+                    reiniciarSelect('filter-dist', 'Todos los Distritos');
+                    filterDist.disabled = true;
+                } else {
+                    const dists = obtenerDistritos(depto, prov);
+                    poblarSelect('filter-dist', dists, 'Todos los Distritos');
+                    filterDist.disabled = false;
+                }
+            });
+        }
+
+        // Si venimos desde el hero con parámetros GET, preseleccionar los filtros de Ubigeo
         if (parametrosEntrada.departamento) {
-            const filtroDepartamento = document.getElementById('filter-dep');
-            if (filtroDepartamento) {
-                const opciones = filtroDepartamento.options;
+            if (filterDep) {
+                const opciones = filterDep.options;
                 for (let i = 0; i < opciones.length; i++) {
                     if (opciones[i].value.toLowerCase() === parametrosEntrada.departamento.toLowerCase()) {
-                        filtroDepartamento.value = opciones[i].value;
+                        filterDep.value = opciones[i].value;
                         break;
                     }
                 }
-                // Si no hay opción exacta, agregar una temporal con el valor recibido
-                if (!filtroDepartamento.value) {
+                
+                if (!filterDep.value) {
                     const opcionNueva = document.createElement('option');
                     opcionNueva.value = parametrosEntrada.departamento;
                     opcionNueva.textContent = parametrosEntrada.departamento;
                     opcionNueva.selected = true;
-                    filtroDepartamento.appendChild(opcionNueva);
+                    filterDep.appendChild(opcionNueva);
+                }
+
+                // Cargar provincia en cascada
+                if (filterProv) {
+                    const provs = obtenerProvincias(filterDep.value);
+                    poblarSelect('filter-prov', provs, 'Todas las Provincias');
+                    filterProv.disabled = false;
+
+                    if (parametrosEntrada.provincia) {
+                        filterProv.value = parametrosEntrada.provincia;
+
+                        // Cargar distrito en cascada
+                        if (filterDist) {
+                            const dists = obtenerDistritos(filterDep.value, filterProv.value);
+                            poblarSelect('filter-dist', dists, 'Todos los Distritos');
+                            filterDist.disabled = false;
+
+                            if (parametrosEntrada.distrito) {
+                                filterDist.value = parametrosEntrada.distrito;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -543,6 +618,8 @@ function initCatalogLogic() {
 
             const filtros = {
                 departamento: document.getElementById('filter-dep') ? document.getElementById('filter-dep').value : '',
+                provincia: document.getElementById('filter-prov') ? document.getElementById('filter-prov').value : '',
+                distrito: document.getElementById('filter-dist') ? document.getElementById('filter-dist').value : '',
                 categoria: document.getElementById('filter-cat') ? document.getElementById('filter-cat').value : '',
                 rating: document.getElementById('filter-rating') ? document.getElementById('filter-rating').value : ''
             };
@@ -711,7 +788,8 @@ function pintarCabeceraTecnico(tecnico) {
     }
 
     asignarTexto('perfil-nombre', tecnico.nombre || 'Técnico');
-    asignarTexto('perfil-meta', (tecnico.especialidad || 'Técnico') + ' · ' + (tecnico.distrito || '') + ', ' + (tecnico.ciudad || ''));
+    const ubicacion = (tecnico.distrito || '') + (tecnico.provincia ? ', ' + tecnico.provincia : '') + ', ' + (tecnico.ciudad || '');
+    asignarTexto('perfil-meta', (tecnico.especialidad || 'Técnico') + ' · ' + ubicacion);
     asignarTexto('perfil-rating', rating);
     asignarTexto('perfil-rating-count', '(' + totalResenas + ' reseñas)');
     asignarTexto('perfil-descripcion', tecnico.descripcion || 'Este técnico aún no agregó una descripción.');
@@ -824,6 +902,25 @@ function initResenaForm(idTecnico) {
 
     const alerta = document.getElementById('resena-alert');
 
+    // Registrar manejador para el botón de abrir modal
+    const btnAbrir = document.getElementById('btn-abrir-resena');
+    if (btnAbrir) {
+        btnAbrir.addEventListener('click', () => {
+            const usuario = obtenerSesionUsuario();
+            if (!usuario) {
+                if (window.ApiUI) {
+                    window.ApiUI.mostrarAlerta(alerta, 'Debes iniciar sesión para dejar una reseña. Redirigiendo al login...', 'error');
+                }
+                window.DOMUtils.openModal('modal-resena');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+            window.DOMUtils.openModal('modal-resena');
+        });
+    }
+
     form.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
@@ -869,6 +966,13 @@ function initResenaForm(idTecnico) {
                 // La reseña cambió el promedio: recargamos lista y cabecera.
                 cargarResenasTecnico(idTecnico);
                 refrescarCabeceraTecnico(idTecnico);
+
+                // Cerrar modal automáticamente después de 1.5 segundos
+                setTimeout(() => {
+                    if (window.DOMUtils && typeof window.DOMUtils.closeModal === 'function') {
+                        window.DOMUtils.closeModal('modal-resena');
+                    }
+                }, 1500);
             } else if (window.ApiUI) {
                 window.ApiUI.mostrarAlerta(alerta, (respuesta && respuesta.message) || 'No se pudo publicar la reseña.', 'error');
             }
@@ -1210,4 +1314,195 @@ async function cargarEstadisticasPlataforma(elemTecnicos, elemResenas, elemProme
     } catch (e) {
         console.error('Error cargando estadísticas en la UI:', e);
     }
+}
+
+/**
+ * Inicializa la interfaz de administración de servicios y tarifas para técnicos en ofrecer.html.
+ */
+async function initGestionServicios() {
+    const cardGestion = document.getElementById('gestion-servicios-card');
+    if (!cardGestion) return;
+
+    const usuario = obtenerSesionUsuario();
+    // Solo mostrar esta sección si el usuario tiene sesión iniciada y su rol es 'tech'
+    if (!usuario || usuario.rol !== 'tech') {
+        cardGestion.style.display = 'none';
+        return;
+    }
+
+    cardGestion.style.display = 'block';
+
+    // Obtener el id_tecnico del usuario logueado para cargar sus servicios
+    let idTecnico = 0;
+    try {
+        const resTecnicos = await window.ApiService.enviarGet('tecnicos', null);
+        if (resTecnicos && resTecnicos.success && resTecnicos.data) {
+            const tecnico = resTecnicos.data.find(t => parseInt(t.id_usuario, 10) === parseInt(usuario.id, 10));
+            if (tecnico) {
+                idTecnico = parseInt(tecnico.id, 10);
+            }
+        }
+    } catch (err) {
+        console.error('Error al obtener perfil técnico:', err);
+    }
+
+    if (idTecnico === 0) {
+        cardGestion.innerHTML = `
+            <div class="text-center py-4">
+                <p class="text-muted">No se pudo cargar tu perfil de técnico. Por favor, asegúrate de haber publicado tu oficio.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Renderizar listado de servicios
+    const renderServicios = async () => {
+        const listaContainer = document.getElementById('lista-servicios-tecnico');
+        if (!listaContainer) return;
+
+        listaContainer.innerHTML = `
+            <div class="text-center py-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-[var(--color-accent)]"></i>
+                <p class="text-muted text-xs mt-1">Cargando tus servicios...</p>
+            </div>
+        `;
+
+        try {
+            const res = await window.ApiService.enviarGet('servicios', { id_tecnico: idTecnico });
+            if (res && res.success && res.data) {
+                if (res.data.length === 0) {
+                    listaContainer.innerHTML = `<p class="text-muted text-center text-sm py-4">No tienes servicios agregados. ¡Agrega el primero arriba!</p>`;
+                    return;
+                }
+
+                listaContainer.innerHTML = res.data.map(serv => {
+                    const precio = parseFloat(serv.precio_base || 0).toFixed(2);
+                    return `
+                        <div class="flex items-center justify-between p-3 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg">
+                            <div>
+                                <h4 class="font-semibold text-sm" style="color: var(--text-primary);">${escaparHTML(serv.titulo)}</h4>
+                                <p class="text-xs text-muted mt-0.5">${escaparHTML(serv.descripcion || 'Sin descripción')}</p>
+                                <span class="text-xs font-medium text-[var(--color-accent)] block mt-1">S/ ${precio} &middot; ${escaparHTML(serv.duracion_estimada)}</span>
+                            </div>
+                            <button type="button" class="btn-eliminar-servicio text-red-500 hover:text-red-700 p-2 text-lg focus:outline-none" data-id="${serv.id}" aria-label="Eliminar servicio">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                // Registrar listeners para botones de eliminar
+                listaContainer.querySelectorAll('.btn-eliminar-servicio').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const idServ = btn.getAttribute('data-id');
+                        if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+                            try {
+                                const respuesta = await window.ApiService.enviarPost('eliminar_servicio', { id_servicio: parseInt(idServ, 10) });
+                                if (respuesta && respuesta.success) {
+                                    renderServicios(); // Recargar la lista
+                                } else {
+                                    alert((respuesta && respuesta.message) || 'Error al eliminar el servicio.');
+                                }
+                            } catch (err) {
+                                console.error('Error eliminando servicio:', err);
+                                alert(err.message || 'Error al conectar con el servidor.');
+                            }
+                        }
+                    });
+                });
+
+            } else {
+                listaContainer.innerHTML = `<p class="text-muted text-center text-sm py-4">Error al cargar servicios.</p>`;
+            }
+        } catch (err) {
+            console.error('Error listando servicios:', err);
+            listaContainer.innerHTML = `<p class="text-muted text-center text-sm py-4">Error de conexión.</p>`;
+        }
+    };
+
+    // Manejar envío del formulario de agregar servicio
+    const formAdd = document.getElementById('add-servicio-form');
+    if (formAdd) {
+        formAdd.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const inputTitulo = document.getElementById('serv-titulo');
+            const textareaDesc = document.getElementById('serv-desc');
+            const inputPrecio = document.getElementById('serv-precio');
+            const inputDuracion = document.getElementById('serv-duracion');
+            const alerta = document.getElementById('serv-alert');
+
+            if (window.ApiUI) {
+                window.ApiUI.ocultarAlerta(alerta);
+            }
+
+            let hasError = false;
+            let msgError = 'Por favor, complete los campos obligatorios.';
+            
+            if (!inputTitulo || !inputTitulo.value.trim()) {
+                inputTitulo.classList.add('input-error');
+                hasError = true;
+            } else {
+                inputTitulo.classList.remove('input-error');
+            }
+
+            if (!inputPrecio || parseFloat(inputPrecio.value) <= 0 || parseFloat(inputPrecio.value) > 999999.99) {
+                inputPrecio.classList.add('input-error');
+                hasError = true;
+                if (inputPrecio && parseFloat(inputPrecio.value) > 999999.99) {
+                    msgError = 'El precio no puede exceder S/ 999,999.99.';
+                }
+            } else {
+                inputPrecio.classList.remove('input-error');
+            }
+
+            if (!inputDuracion || !inputDuracion.value.trim()) {
+                inputDuracion.classList.add('input-error');
+                hasError = true;
+            } else {
+                inputDuracion.classList.remove('input-error');
+            }
+
+            if (hasError) {
+                if (window.ApiUI) {
+                    window.ApiUI.mostrarAlerta(alerta, msgError, 'error');
+                }
+                return;
+            }
+
+            const submitBtn = formAdd.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Agregando...';
+
+            try {
+                const respuesta = await window.ApiService.enviarPost('crear_servicio', {
+                    titulo: inputTitulo.value.trim(),
+                    descripcion: textareaDesc ? textareaDesc.value.trim() : '',
+                    precio_base: parseFloat(inputPrecio.value),
+                    duracion_estimada: inputDuracion.value.trim()
+                });
+
+                if (respuesta && respuesta.success) {
+                    formAdd.reset();
+                    renderServicios(); // Recargar la lista
+                } else {
+                    if (window.ApiUI) {
+                        window.ApiUI.mostrarAlerta(alerta, (respuesta && respuesta.message) || 'No se pudo agregar el servicio.', 'error');
+                    }
+                }
+            } catch (err) {
+                console.error('Error agregando servicio:', err);
+                if (window.ApiUI) {
+                    window.ApiUI.mostrarAlerta(alerta, err.message || 'Error inesperado al conectar con el servidor.', 'error');
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Cargar lista inicial
+    renderServicios();
 }

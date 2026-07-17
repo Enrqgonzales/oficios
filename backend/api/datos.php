@@ -100,6 +100,18 @@ switch ($accionSolicitada) {
         procesarOfrecerServicio($pdo);
         break;
 
+    case 'eliminar_resena':
+        procesarEliminarResena($pdo);
+        break;
+
+    case 'eliminar_servicio':
+        procesarEliminarServicio($pdo);
+        break;
+
+    case 'crear_servicio':
+        procesarCrearServicio($pdo);
+        break;
+
     case 'estadisticas':
         procesarObtenerEstadisticas($pdo);
         break;
@@ -107,7 +119,7 @@ switch ($accionSolicitada) {
     default:
         responderJSON(404, [
             'success' => false,
-            'message' => 'Acción API no reconocida. Use ?action=login, logout, registro, tecnicos, tecnico, servicios, resenas, crear_resena, ofrecer_servicio u estadisticas.'
+            'message' => 'Acción API no reconocida. Use ?action=login, logout, registro, tecnicos, tecnico, servicios, resenas, crear_resena, ofrecer_servicio, eliminar_resena, eliminar_servicio, crear_servicio u estadisticas.'
         ]);
         break;
 }
@@ -363,14 +375,16 @@ function procesarListaTecnicos($pdo) {
     }
 
     $filtroDepartamento = limpiarEntrada($_GET['departamento'] ?? '');
+    $filtroProvincia = limpiarEntrada($_GET['provincia'] ?? '');
+    $filtroDistrito = limpiarEntrada($_GET['distrito'] ?? '');
     $filtroCategoria = limpiarEntrada($_GET['categoria'] ?? '');
     $filtroRating = limpiarEntrada($_GET['rating'] ?? '');
 
     try {
         // Consulta base con JOIN para juntar nombre del usuario y categoría del oficio
-        $consulta = 'SELECT t.id, t.id_usuario, t.id_oficio, t.especialidad, t.ciudad, t.distrito,
+        $consulta = 'SELECT t.id, t.id_usuario, t.id_oficio, t.especialidad, t.ciudad, t.provincia, t.distrito,
                             t.descripcion, t.tags, t.imagen, t.valoracion, t.resenas, t.online,
-                            u.nombre, u.email, u.celular, u.departamento, u.provincia,
+                            u.nombre, u.email, u.celular, u.departamento, u.provincia AS usuario_provincia,
                             o.nombre AS oficio_nombre, o.categoria AS oficio_categoria
                      FROM tecnicos t
                      INNER JOIN usuarios u ON t.id_usuario = u.id
@@ -383,6 +397,18 @@ function procesarListaTecnicos($pdo) {
             $consulta .= ' AND (LOWER(u.departamento) = LOWER(:departamento_user) OR LOWER(t.ciudad) = LOWER(:departamento_ciudad))';
             $parametros[':departamento_user'] = $filtroDepartamento;
             $parametros[':departamento_ciudad'] = $filtroDepartamento;
+        }
+
+        if ($filtroProvincia !== '') {
+            $consulta .= ' AND (LOWER(u.provincia) = LOWER(:provincia_user) OR LOWER(t.provincia) = LOWER(:provincia_tech))';
+            $parametros[':provincia_user'] = $filtroProvincia;
+            $parametros[':provincia_tech'] = $filtroProvincia;
+        }
+
+        if ($filtroDistrito !== '') {
+            $consulta .= ' AND (LOWER(u.distrito) = LOWER(:distrito_user) OR LOWER(t.distrito) = LOWER(:distrito_tech))';
+            $parametros[':distrito_user'] = $filtroDistrito;
+            $parametros[':distrito_tech'] = $filtroDistrito;
         }
 
         if ($filtroCategoria !== '') {
@@ -432,9 +458,9 @@ function procesarObtenerTecnico($pdo) {
     }
 
     try {
-        $sentencia = $pdo->prepare('SELECT t.id, t.id_usuario, t.id_oficio, t.especialidad, t.ciudad, t.distrito,
+        $sentencia = $pdo->prepare('SELECT t.id, t.id_usuario, t.id_oficio, t.especialidad, t.ciudad, t.provincia, t.distrito,
                                            t.descripcion, t.tags, t.imagen, t.valoracion, t.resenas, t.online,
-                                           u.nombre, u.email, u.celular, u.departamento, u.provincia,
+                                           u.nombre, u.email, u.celular, u.departamento, u.provincia AS usuario_provincia,
                                            o.nombre AS oficio_nombre, o.categoria AS oficio_categoria
                                     FROM tecnicos t
                                     INNER JOIN usuarios u ON t.id_usuario = u.id
@@ -779,6 +805,7 @@ function procesarOfrecerServicio($pdo) {
                                      SET id_oficio = :id_oficio,
                                          especialidad = :especialidad,
                                          ciudad = :ciudad,
+                                         provincia = :provincia,
                                          distrito = :distrito,
                                          descripcion = :descripcion,
                                          imagen = :imagen,
@@ -790,14 +817,15 @@ function procesarOfrecerServicio($pdo) {
                 ':id_oficio' => $idOficio,
                 ':especialidad' => $oficio,
                 ':ciudad' => $departamento,
+                ':provincia' => $provincia,
                 ':distrito' => $distrito,
                 ':descripcion' => $descripcion,
                 ':imagen' => $rutaImagen,
                 ':id_usuario' => $idUsuario
             ]);
         } else {
-            $sqlInsertarTecnico = 'INSERT INTO tecnicos (id_usuario, id_oficio, especialidad, ciudad, distrito, descripcion, tags, imagen, valoracion, resenas, online)
-                                   VALUES (:id_usuario, :id_oficio, :especialidad, :ciudad, :distrito, :descripcion, :tags, :imagen, 5.0, 0, 1)';
+            $sqlInsertarTecnico = 'INSERT INTO tecnicos (id_usuario, id_oficio, especialidad, ciudad, provincia, distrito, descripcion, tags, imagen, valoracion, resenas, online)
+                                   VALUES (:id_usuario, :id_oficio, :especialidad, :ciudad, :provincia, :distrito, :descripcion, :tags, :imagen, 5.0, 0, 1)';
 
             $sentenciaInsertarTecnico = $pdo->prepare($sqlInsertarTecnico);
             $sentenciaInsertarTecnico->execute([
@@ -805,6 +833,7 @@ function procesarOfrecerServicio($pdo) {
                 ':id_oficio' => $idOficio,
                 ':especialidad' => $oficio,
                 ':ciudad' => $departamento,
+                ':provincia' => $provincia,
                 ':distrito' => $distrito,
                 ':descripcion' => $descripcion,
                 ':tags' => $oficio,
@@ -876,5 +905,230 @@ function procesarObtenerEstadisticas($pdo) {
 
     } catch (PDOException $e) {
         responderJSON(500, armarErrorServidor('Error al consultar las estadísticas de la plataforma.', $e));
+    }
+}
+
+/**
+ * Elimina una reseña específica y recalcula dinámicamente la valoración del técnico afectado.
+ */
+function procesarEliminarResena($pdo) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        responderJSON(405, ['success' => false, 'message' => 'Método no permitido. Use POST.']);
+    }
+
+    // Validar sesión activa
+    if (!isset($_SESSION['usuario'])) {
+        responderJSON(401, [
+            'success' => false,
+            'message' => 'No autorizado. Debe iniciar sesión para eliminar una reseña.'
+        ]);
+    }
+
+    $datos = leerCuerpoJSON();
+    $idResena = isset($datos['id_resena']) ? (int) $datos['id_resena'] : 0;
+
+    if ($idResena <= 0) {
+        responderJSON(400, [
+            'success' => false,
+            'message' => 'Debe indicar un id_resena válido.'
+        ]);
+    }
+
+    try {
+        // Consultar existencia y detalles de la reseña
+        $sentenciaSeleccionar = $pdo->prepare('SELECT id_cliente, id_tecnico FROM resenas WHERE id = :id LIMIT 1');
+        $sentenciaSeleccionar->execute([':id' => $idResena]);
+        $resena = $sentenciaSeleccionar->fetch();
+
+        if (!$resena) {
+            responderJSON(404, [
+                'success' => false,
+                'message' => 'No se encontró la reseña solicitada.'
+            ]);
+        }
+
+        // Validar propiedad (solo el autor de la reseña puede eliminarla)
+        if ((int) $_SESSION['usuario']['id'] !== (int) $resena['id_cliente']) {
+            responderJSON(403, [
+                'success' => false,
+                'message' => 'No autorizado. No tiene permisos para eliminar esta reseña.'
+            ]);
+        }
+
+        $idTecnico = (int) $resena['id_tecnico'];
+
+        $pdo->beginTransaction();
+
+        // Eliminar reseña
+        $sentenciaEliminar = $pdo->prepare('DELETE FROM resenas WHERE id = :id');
+        $sentenciaEliminar->execute([':id' => $idResena]);
+
+        // Recalcular promedio y total del técnico
+        $sqlActualizarTecnico = 'UPDATE tecnicos
+                                 SET valoracion = (SELECT IFNULL(ROUND(AVG(calificacion), 1), 5.0) FROM resenas WHERE id_tecnico = :id_tecnico_avg),
+                                     resenas = (SELECT COUNT(*) FROM resenas WHERE id_tecnico = :id_tecnico_count)
+                                 WHERE id = :id_tecnico_update';
+
+        $sentenciaActualizar = $pdo->prepare($sqlActualizarTecnico);
+        $sentenciaActualizar->execute([
+            ':id_tecnico_avg' => $idTecnico,
+            ':id_tecnico_count' => $idTecnico,
+            ':id_tecnico_update' => $idTecnico
+        ]);
+
+        $pdo->commit();
+
+        responderJSON(200, [
+            'success' => true,
+            'message' => 'Reseña eliminada con éxito.'
+        ]);
+
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        responderJSON(500, armarErrorServidor('Error al eliminar la reseña en el servidor.', $e));
+    }
+}
+
+/**
+ * Elimina un servicio específico verificado bajo la propiedad del técnico autenticado.
+ */
+function procesarEliminarServicio($pdo) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        responderJSON(405, ['success' => false, 'message' => 'Método no permitido. Use POST.']);
+    }
+
+    // Validar sesión activa
+    if (!isset($_SESSION['usuario'])) {
+        responderJSON(401, [
+            'success' => false,
+            'message' => 'No autorizado. Debe iniciar sesión para eliminar un servicio.'
+        ]);
+    }
+
+    $datos = leerCuerpoJSON();
+    $idServicio = isset($datos['id_servicio']) ? (int) $datos['id_servicio'] : 0;
+
+    if ($idServicio <= 0) {
+        responderJSON(400, [
+            'success' => false,
+            'message' => 'Debe indicar un id_servicio válido.'
+        ]);
+    }
+
+    try {
+        // Consultar existencia y detalles del servicio
+        $sentenciaServicio = $pdo->prepare('SELECT id_tecnico FROM servicios WHERE id = :id LIMIT 1');
+        $sentenciaServicio->execute([':id' => $idServicio]);
+        $servicio = $sentenciaServicio->fetch();
+
+        if (!$servicio) {
+            responderJSON(404, [
+                'success' => false,
+                'message' => 'No se encontró el servicio solicitado.'
+            ]);
+        }
+
+        // Consultar el perfil del técnico asociado al usuario autenticado
+        $sentenciaTecnico = $pdo->prepare('SELECT id FROM tecnicos WHERE id_usuario = :id_usuario LIMIT 1');
+        $sentenciaTecnico->execute([':id_usuario' => (int) $_SESSION['usuario']['id']]);
+        $tecnico = $sentenciaTecnico->fetch();
+
+        // Validar propiedad del servicio (el usuario debe ser técnico y el servicio debe pertenecer a su perfil)
+        if (!$tecnico || (int) $tecnico['id'] !== (int) $servicio['id_tecnico']) {
+            responderJSON(403, [
+                'success' => false,
+                'message' => 'No autorizado. No tiene permisos para eliminar este servicio.'
+            ]);
+        }
+
+        // Eliminar servicio
+        $sentenciaEliminar = $pdo->prepare('DELETE FROM servicios WHERE id = :id');
+        $sentenciaEliminar->execute([':id' => $idServicio]);
+
+        responderJSON(200, [
+            'success' => true,
+            'message' => 'Servicio eliminado con éxito.'
+        ]);
+
+    } catch (PDOException $e) {
+        responderJSON(500, armarErrorServidor('Error al eliminar el servicio en el servidor.', $e));
+    }
+}
+
+/**
+ * Crea un nuevo servicio/tarifa para el perfil del técnico autenticado.
+ */
+function procesarCrearServicio($pdo) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        responderJSON(405, ['success' => false, 'message' => 'Método no permitido. Use POST.']);
+    }
+
+    // Validar sesión activa
+    if (!isset($_SESSION['usuario'])) {
+        responderJSON(401, [
+            'success' => false,
+            'message' => 'No autorizado. Debe iniciar sesión para agregar un servicio.'
+        ]);
+    }
+
+    $datos = leerCuerpoJSON();
+    $titulo = limpiarEntrada($datos['titulo'] ?? '');
+    $descripcion = limpiarEntrada($datos['descripcion'] ?? '');
+    $precioBase = isset($datos['precio_base']) ? floatval($datos['precio_base']) : 0.0;
+    $duracionEstimada = limpiarEntrada($datos['duracion_estimada'] ?? '');
+
+    // Validar campos obligatorios
+    if ($titulo === '' || $precioBase <= 0 || $duracionEstimada === '') {
+        responderJSON(400, [
+            'success' => false,
+            'message' => 'El título, el precio base (mayor a 0) y la duración estimada son obligatorios.'
+        ]);
+    }
+
+    if ($precioBase > 999999.99) {
+        responderJSON(400, [
+            'success' => false,
+            'message' => 'El precio no puede exceder S/ 999,999.99.'
+        ]);
+    }
+
+    try {
+        // Consultar el perfil del técnico asociado al usuario autenticado
+        $sentenciaTecnico = $pdo->prepare('SELECT id FROM tecnicos WHERE id_usuario = :id_usuario LIMIT 1');
+        $sentenciaTecnico->execute([':id_usuario' => (int) $_SESSION['usuario']['id']]);
+        $tecnico = $sentenciaTecnico->fetch();
+
+        // Validar que el usuario sea realmente técnico
+        if (!$tecnico) {
+            responderJSON(403, [
+                'success' => false,
+                'message' => 'No autorizado. Debe publicar su perfil técnico antes de agregar tarifas.'
+            ]);
+        }
+
+        $idTecnico = (int) $tecnico['id'];
+
+        // Insertar el nuevo servicio
+        $sqlInsertar = 'INSERT INTO servicios (id_tecnico, titulo, descripcion, precio_base, duracion_estimada)
+                        VALUES (:id_tecnico, :titulo, :descripcion, :precio_base, :duracion_estimada)';
+        
+        $sentenciaInsertar = $pdo->prepare($sqlInsertar);
+        $sentenciaInsertar->execute([
+            ':id_tecnico' => $idTecnico,
+            ':titulo' => $titulo,
+            ':descripcion' => $descripcion,
+            ':precio_base' => $precioBase,
+            ':duracion_estimada' => $duracionEstimada
+        ]);
+
+        responderJSON(201, [
+            'success' => true,
+            'message' => 'Servicio agregado con éxito.'
+        ]);
+
+    } catch (PDOException $e) {
+        responderJSON(500, armarErrorServidor('Error al crear el servicio en el servidor.', $e));
     }
 }

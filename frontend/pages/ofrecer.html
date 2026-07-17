@@ -16,8 +16,10 @@
     .auth-container {
       min-height: calc(100vh - 150px);
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
+      align-items: flex-start;
       justify-content: center;
+      gap: 2.5rem;
       padding: 3rem 0;
       background: radial-gradient(circle at center, var(--color-accent-subtle), transparent 70%);
     }
@@ -209,6 +211,62 @@
         </div>
 
       </form>
+    </div>
+
+    <!-- Tarjeta de Gestión de Servicios y Tarifas (sólo visible para técnicos registrados) -->
+    <div id="gestion-servicios-card" class="auth-card animate-slide-up mt-4" style="display: none;">
+      <div class="auth-card__header">
+        <h2 class="auth-card__title" style="font-size: 1.25rem;">Mis Tarifas y Servicios</h2>
+        <p class="auth-card__subtitle">Agrega o elimina los servicios y precios que ofreces al público.</p>
+      </div>
+
+      <!-- Formulario para agregar un servicio -->
+      <form id="add-servicio-form" novalidate style="margin-bottom: 2rem;">
+        <div class="form-group">
+          <label for="serv-titulo" class="form-group__label">Nombre del Servicio *</label>
+          <div class="form-group__control-wrapper">
+            <i class="fa-solid fa-circle-info form-group__icon"></i>
+            <input type="text" id="serv-titulo" class="form-group__control" placeholder="Ej: Cambio de llave térmica" required aria-required="true">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="serv-desc" class="form-group__label">Descripción (opcional)</label>
+          <textarea id="serv-desc" class="form-group__control form-group__control--textarea" style="padding-left: 1rem; min-height: 70px;" placeholder="Detalles de lo que incluye el servicio..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="serv-precio" class="form-group__label">Precio Base (S/) *</label>
+          <div class="form-group__control-wrapper">
+            <i class="fa-solid fa-money-bill-1 form-group__icon"></i>
+            <input type="number" id="serv-precio" class="form-group__control" placeholder="Ej: 150.00" step="0.01" min="0.01" max="999999.99" required aria-required="true">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="serv-duracion" class="form-group__label">Duración Estimada *</label>
+          <div class="form-group__control-wrapper">
+            <i class="fa-solid fa-clock form-group__icon"></i>
+            <input type="text" id="serv-duracion" class="form-group__control" placeholder="Ej: 2 horas, 1 día" required aria-required="true">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn--primary w-full py-3" style="font-weight: 600;">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          <span>Agregar Servicio</span>
+        </button>
+
+        <div id="serv-alert" role="alert" class="alert-error mx-auto mt-3" style="display: none;">
+          <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+          <span></span>
+        </div>
+      </form>
+
+      <!-- Listado de servicios existentes -->
+      <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider" style="color: var(--text-secondary);">Mis Servicios Publicados</h3>
+      <div id="lista-servicios-tecnico" class="flex flex-col gap-3">
+        <!-- Inyectados dinámicamente por main.js -->
+      </div>
     </div>
   </main>
 

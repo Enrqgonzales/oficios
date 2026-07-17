@@ -128,37 +128,53 @@
 
       <!-- Sección de reseñas (ocupa todo el ancho debajo de las dos columnas) -->
       <section class="md:col-span-3 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6">
-        <h2 class="catalog-section__title mb-4">Reseñas de clientes</h2>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="catalog-section__title">Reseñas de clientes</h2>
+          <button id="btn-abrir-resena" class="btn btn--outline" type="button">
+            <i class="fa-solid fa-pen-to-square"></i> Escribir reseña
+          </button>
+        </div>
 
         <div id="perfil-resenas" class="mb-6">
           <!-- Reseñas inyectadas por main.js -->
         </div>
 
-        <!-- Formulario para dejar una reseña (solo clientes con sesión activa) -->
-        <h3 class="font-semibold mb-3" style="font-size:1.05rem;">Deja tu reseña</h3>
-        <form id="resena-form" novalidate>
-          <div class="form-group">
-            <label for="resena-calificacion" class="form-group__label">Calificación</label>
-            <select id="resena-calificacion" class="form-group__control" style="max-width:240px;">
-              <option value="5">★★★★★ (5) Excelente</option>
-              <option value="4">★★★★ (4) Muy bueno</option>
-              <option value="3">★★★ (3) Bueno</option>
-              <option value="2">★★ (2) Regular</option>
-              <option value="1">★ (1) Malo</option>
-            </select>
+        <!-- Modal para dejar una reseña (sólo clientes con sesión activa) -->
+        <div id="modal-resena" class="modal-container fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-60 p-4" aria-hidden="true">
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6 w-full max-w-lg shadow-2xl relative animate-slide-up">
+            
+            <!-- Botón X de cierre -->
+            <button type="button" class="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl focus:outline-none" onclick="window.DOMUtils.closeModal('modal-resena')" aria-label="Cerrar modal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="font-semibold mb-4 text-xl" style="font-size:1.25rem; color: var(--text-primary);">Deja tu reseña</h3>
+
+            <form id="resena-form" novalidate>
+              <div class="form-group">
+                <label for="resena-calificacion" class="form-group__label">Calificación</label>
+                <select id="resena-calificacion" class="form-group__control" style="max-width:240px;">
+                  <option value="5">★★★★★ (5) Excelente</option>
+                  <option value="4">★★★★ (4) Muy bueno</option>
+                  <option value="3">★★★ (3) Bueno</option>
+                  <option value="2">★★ (2) Regular</option>
+                  <option value="1">★ (1) Malo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="resena-comentario" class="form-group__label">Comentario</label>
+                <textarea id="resena-comentario" class="form-group__control" style="min-height:90px; resize:vertical;" placeholder="Cuéntanos cómo fue tu experiencia con este técnico (mínimo 10 caracteres)."></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary py-3 w-full" style="font-weight:600;">
+                Publicar reseña
+              </button>
+              <div id="resena-alert" role="alert" class="alert-error mx-auto mt-3" style="display:none;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span></span>
+              </div>
+            </form>
           </div>
-          <div class="form-group">
-            <label for="resena-comentario" class="form-group__label">Comentario</label>
-            <textarea id="resena-comentario" class="form-group__control" style="min-height:90px; resize:vertical;" placeholder="Cuéntanos cómo fue tu experiencia con este técnico (mínimo 10 caracteres)."></textarea>
-          </div>
-          <button type="submit" class="btn btn--primary py-3" style="font-weight:600;">
-            Publicar reseña
-          </button>
-          <div id="resena-alert" role="alert" class="alert-error mx-auto mt-3" style="display:none;">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span></span>
-          </div>
-        </form>
+        </div>
       </section>
 
     </div>
